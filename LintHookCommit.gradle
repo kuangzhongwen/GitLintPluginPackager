@@ -8,3 +8,11 @@ task copyGitPreCommitFile(type: Copy) {
         }
     }
 }
+
+allprojects {
+    afterEvaluate {
+        def preBuild = project.tasks.findByName('preBuild')
+        if (preBuild != null)
+            preBuild.dependsOn copyGitPreCommitFile
+    }
+}

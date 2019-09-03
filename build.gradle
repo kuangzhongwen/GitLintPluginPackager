@@ -19,13 +19,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        
-    }
-
-    afterEvaluate {
-        def preBuild = project.tasks.findByName('preBuild')
-        if (preBuild != null)
-            preBuild.dependsOn copyGitPreCommitFile
     }
 }
 

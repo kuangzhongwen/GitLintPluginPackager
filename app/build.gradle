@@ -26,21 +26,3 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
-
-task copyHookGitPreCommitFile(type: Copy) {
-    println('insert to build task')
-    from new File(rootProject.rootDir, 'hooks/pre-commit')
-    into {
-        new File(rootProject.rootDir, '.git/hooks')
-    }
-}
-
-d {
-    afterEvaluate {
-        def buildTask = project.tasks.findByName("build")
-        if (buildTask != null) {
-            println('insert to build task')
-            buildTask.dependsOn copyHookGitPreCommitFile
-        }
-    }
-}

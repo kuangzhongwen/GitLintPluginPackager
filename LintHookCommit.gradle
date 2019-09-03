@@ -1,0 +1,10 @@
+
+task copyGitPreCommitFile(type: Copy) {
+    File preCommitFile = new File(rootProject.rootDir, '.git/hooks/pre-commit')
+    if (preCommitFile == null || !preCommitFile.exists()) {
+        from new File(rootProject.rootDir, 'hooks/pre-commit')
+        into {
+            new File(rootProject.rootDir, '.git/hooks')
+        }
+    }
+}

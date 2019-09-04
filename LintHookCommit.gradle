@@ -9,7 +9,7 @@ task copyGitPreCommitFile(type: Copy) {
     }
     doLast {
         /**
-         * 注意导入到 .git 目录后，需要对 ./git/hooks/pre-commit 执行  chmod u+x，否则会：
+         * 注意导入到 .git 目录后，需要对 ./git/hooks/pre-commit 执行 chmod u+x，否则会：
          * hint: The '.git/hooks/pre-commit' hook was ignored because it's not set as executable.
          */
         println 'execute chmod u+x pre-commit'

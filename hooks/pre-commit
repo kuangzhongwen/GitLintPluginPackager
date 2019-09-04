@@ -4,16 +4,16 @@ red='\033[0;31m'
 green='\033[0;32m'
 noColor='\033[0m'
 
-# for XXX and YYY
+# 工具区根目录
 projectDir=$(git rev-parse --show-toplevel)
-lintProjects=("XXX" "YYY")
+lintProjects=("HookGitCommitWithLintDemo")
 
 for project in ${lintProjects[@]}
 do
     # Android lint check
-    echo "-----------------Starting run android lint for ${project}-----------------"
+    echo "-------------- Starting run android lint for ${project} ---------------"
     lintReportPath="${project}/build/reports/lint-results.html"
-
+    # 执行 lint，获取 lint error 数
     for issueCount in $(./gradlew ${project}:lint 2>/dev/null | grep "Ran lint on variant" | egrep -o '[0-9]+')
     do
         if [ $issueCount -ne 0 ]
@@ -24,16 +24,4 @@ do
         fi
     done
     echo "${green}Successed, no android lint issues found for ${project}${noColor}\n"
-
-    # Checkstyle
-    echo "-----------------Starting run android checkstyle for ${project}-----------------"
-    checkstylePath="${project}/build/reports/checkstyle/checkstyle.html"
-
-    ./gradlew ${project}:checkstyle >/dev/null
-    checkstyleStatus=$?
-    if [ $checkstyleStatus -ne 0 ]
-    then
-        exit $checkstyleStatus
-    fi
-    echo "${green}Successed, no android checkstyle issues found for ${project}${noColor}\n\n"
 done

@@ -6,7 +6,7 @@ noColor='\033[0m'
 
 # 工具区根目录
 projectDir=$(git rev-parse --show-toplevel)
-lintProjects=("HookGitCommitWithLintDemo")
+lintProjects=("HookGitWithLintDemo")
 
 for project in ${lintProjects[@]}
 do

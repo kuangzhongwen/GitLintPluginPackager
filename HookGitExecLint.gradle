@@ -1,0 +1,32 @@
+
+// hook 的 git 文件
+def HOOK_GIT_FILENAME = 'pre-push'
+
+task copyGitHookFile(type: Copy) {
+    File preCommitFile = new File(rootProject.rootDir, '.git/hooks/' + HOOK_GIT_FILENAME)
+    if (preCommitFile == null || !preCommitFile.exists()) {
+        from new File(rootProject.rootDir, 'hooks/' + HOOK_GIT_FILENAME)
+        into {
+            new File(rootProject.rootDir, '.git/hooks')
+        }
+    }
+    doLast {
+        /**
+         * 注意导入到 .git 目录后，需要对 ./git/hooks/pre-push 执行 chmod u+x，否则会：
+         * hint: The '.git/hooks/pre-push' hook was ignored because it's not set as executable.
+         */
+        println 'execute chmod u+x ' + HOOK_GIT_FILENAME
+        exec {
+            workingDir '.'
+            commandLine 'sh', '-c', 'chmod u+x ' + rootProject.rootDir + '/.git/hooks/' + HOOK_GIT_FILENAME
+        }
+    }
+}
+
+allprojects {
+    afterEvaluate {
+        def preBuild = project.tasks.findByName('preBuild')
+        if (preBuild != null)
+            preBuild.dependsOn copyGitHookFile
+    }
+}

@@ -1,5 +1,6 @@
 package com.wuba.gitlint
 
+import com.android.tools.lint.XmlReporter
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -20,7 +21,9 @@ class GitLintPlugin implements Plugin<Project> {
         // 将 LintConfig 类作为 Project 的一个属性值，key 为 lintConfig
         project.extensions.create("lintConfig", LintConfig.class)
 
-        // 新建一个 lintCheck task
+        /**
+         * lintCheck task
+         */
         project.task("lintCheck") << {
             println("task lintCheck BEGIN =====")
             String[] fileTypesWillFix
@@ -52,8 +55,75 @@ class GitLintPlugin implements Plugin<Project> {
                 }
             }
 
-            println("need checked files size:" + files.size())
+            println("wait checked files size:" + files.size())
+            // 获取 ANDROID_HOME 环境变量
             println(System.getenv("ANDROID_HOME"))
+
+            def cl = new LintToolClient()
+            // LintCliFlags 用于设置Lint检查的一些标志
+            def flag = cl.flags
+            flag.setExitCode = true
+            /*
+             * HtmlReport
+             * 输出HTML格式的报告
+             * 输出路径:/{$rootDir}/lint-all-result.html
+             */
+            // 是否输出全部的扫描结果
+            if (project.lintConfig != null && project.lintConfig.lintReportAll) {
+                File outputResult = new File("lint-check-result-all.xml")
+                def xmlReporter = new XmlReporter(cl, outputResult)
+                flag.reporters.add(xmlReporter)
+            }
+            /*
+             * 输出TXT格式的报告
+             */
+            File lintResult = new File("lint-check-result.txt")
+            Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lintResult), "UTF-8"))
+            def txtReporter = new LintTxtReporter(cl, lintResult, writer, startIndex, endIndex)
+            flag.reporters.add(txtReporter)
+
+            /*
+             * 执行run方法开始lint检查
+             *
+             * LintIssueRegistry()-> 自定义Lint检查规则
+             * files->需要检查的文件文件
+             * result 检查结果 设置flag.setExitCode = true时, 有错误的时候返回1 反之返回0
+             */
+            cl.run(new LintIssueRegistry(), files)
+            println("lint issue numbers: " + txtReporter.issueNumber)
+
+            //根据报告中存在的问题进行判断是否需要回退
+            if (txtReporter.issueNumber > 0) {
+                //回退commit
+                "git reset HEAD~1".execute(null, project.getRootDir())
+            }
+
+            println("============ Lint check end ===============")
+        }
+
+        /**
+         * gradle task: 将 git hooks 脚本复制到 .git/hooks 文件夹下
+         * 根据不同的系统类型复制不同的 git hooks 脚本(现支持 Windows、Linux 两种)
+         */
+        project.task("installGitHooks").doLast {
+            println("OS Type:" + System.getProperty("os.name"))
+            File postCommit
+            String OSType = System.getProperty("os.name")
+            if (OSType.contains("Windows")) {
+                postCommit = new File(project.rootDir, "post-commit-windows")
+            } else {
+                postCommit = new File(project.rootDir, "post-commit")
+            }
+
+            project.copy {
+                from(postCommit) {
+                    rename {
+                        String filename ->
+                            "post-commit"
+                    }
+                }
+                into new File(project.rootDir, ".git/hooks/")
+            }
         }
     }
 }

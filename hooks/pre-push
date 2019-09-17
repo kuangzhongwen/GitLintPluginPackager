@@ -20,8 +20,8 @@ do
         then
             echo "${red}Failed, ${project} project has ${issueCount} lint issues!${noColor}"
             echo "Please refer file://${projectDir}/${lintReportPath}"
-            # 回滚本次提交的代码，注意需要校验本地是否有未提及的 commit
-            git reset --hard HEAD~
+            # 丢弃本地所有修改
+            git checkout . && git clean -xdf
             exit 1
         fi
     done

@@ -1,0 +1,17 @@
+apply plugin: 'groovy'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.tools.lint:lint-api:26.5.0'
+    implementation 'com.android.tools.lint:lint-checks:26.5.0'
+    implementation 'com.android.tools.lint:lint:26.5.0'
+
+    implementation gradleApi()
+    implementation localGroovy()
+}
+
+repositories {
+    google()
+    jcenter()
+}

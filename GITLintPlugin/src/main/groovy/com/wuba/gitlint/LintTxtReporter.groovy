@@ -56,10 +56,8 @@ class LintTxtReporter extends Reporter {
             int lineNo
             for (Warning warning : issues) {
                 isBetweenNewLines = false
-
                 //输出的行号与文件中对应的行号相差1,所以这里进行加1操作
                 lineNo = warning.line + 1
-
                 /*
                  * 1.找出扫描结果的行号是否在修改代码之间
                  */
@@ -77,7 +75,6 @@ class LintTxtReporter extends Reporter {
                 if (!isBetweenNewLines) {
                     continue
                 }
-
                 /*
                  * 3.Lint扫描的Issue在修改的范围内,将扫描结果写入文件
                  */
@@ -86,9 +83,8 @@ class LintTxtReporter extends Reporter {
                     lastIssue = warning.issue
                 }
 
-                //记录Issue的数量
+                // 记录 Issue 的数量
                 issueNumber++
-
                 String p = warning.path
                 if (p != null) {
                     output.append("(").append(issueNumber).append(")")
@@ -96,7 +92,6 @@ class LintTxtReporter extends Reporter {
                     appendPath(output, p)
                     output.append('\n')
                     output.append("问题行号: ")
-
                     if (warning.line >= 0) {
                         output.append(Integer.toString(lineNo))
                         output.append('\n')
@@ -118,13 +113,11 @@ class LintTxtReporter extends Reporter {
                     output.append(']')
                 }
                 output.append('\n')
-
                 if (warning.errorLine != null && !warning.errorLine.isEmpty()) {
                     output.append("问题代码: ")
                     output.append(warning.errorLine)
                 }
                 //output.append('\n')
-
                 if (warning.location != null && warning.location.getSecondary() != null) {
                     Location location = warning.location.getSecondary()
                     boolean omitted = false
@@ -142,7 +135,6 @@ class LintTxtReporter extends Reporter {
                                     output.append(Integer.toString(line + 1))
                                 }
                             }
-
                             if (location.getMessage() != null && !location.getMessage().isEmpty()) {
                                 output.append(": ")
                                 output.append(TextFormat.RAW.convertTo(location.message, TextFormat.TEXT))
@@ -152,7 +144,6 @@ class LintTxtReporter extends Reporter {
                         } else {
                             omitted = true
                         }
-
                         location = location.getSecondary()
                     }
 
@@ -162,12 +153,10 @@ class LintTxtReporter extends Reporter {
                         sb.append("Also affects: ")
                         int begin = sb.length()
                         while (location != null) {
-                            if (location.getMessage() == null
-                                    || location.getMessage().isEmpty()) {
+                            if (location.getMessage() == null || location.getMessage().isEmpty()) {
                                 if (sb.length() > begin) {
                                     sb.append(", ")
                                 }
-
                                 String path = client.getDisplayPath(warning.project, location.getFile())
                                 appendPath(sb, path)
 

@@ -8,6 +8,5 @@ package com.wuba.gitlint
 class LintConfig {
 
     def lintCheckFileType = ""
-
     def lintReportAll = false
 }

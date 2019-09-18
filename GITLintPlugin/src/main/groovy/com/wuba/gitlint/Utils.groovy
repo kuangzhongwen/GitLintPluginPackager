@@ -62,7 +62,6 @@ class Utils {
             String changeInfo = command.execute(null, project.getRootDir()).text.trim()
             String[] changeLogs = changeInfo.split("@@")
             String[] indexArray
-
             for (int i = 1; i < changeLogs.size(); i += 2) {
                 indexArray = changeLogs[i].trim().split(" ")
                 try {

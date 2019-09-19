@@ -4,6 +4,7 @@ import com.android.tools.lint.XmlReporter
 import com.wuba.lintissue.LintIssueRegistry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.Copy
 
 /**
  * 通过自定义的 Lint 规则检查增量代码，hook git 流程，如 lint 检查出 error, 则终止 git 流程，回滚代码.
@@ -98,28 +99,31 @@ class GitLintPlugin implements Plugin<Project> {
             println("============ Lint check END ===============")
         }
 
+
+        // hook 的 git 文件
+        def HOOK_GIT_FILENAME = 'post-commit'
+
         /**
          * gradle task: 将 git hooks 脚本复制到 .git/hooks 文件夹下
-         * 根据不同的系统类型复制不同的 git hooks 脚本(现支持 Windows、Linux 两种)
          */
-        project.task("installGitHooks").doLast {
-            println("OS Type:" + System.getProperty("os.name"))
-            File postCommit
-            String OSType = System.getProperty("os.name")
-            if (OSType.contains("Windows")) {
-                postCommit = new File(project.rootDir, "post-commit-windows")
-            } else {
-                postCommit = new File(project.rootDir, "post-commit")
-            }
-
-            project.copy {
-                from(postCommit) {
-                    rename {
-                        String filename ->
-                            "post-commit"
-                    }
+        task installGitHooks(type: Copy) {
+            File preCommitFile = new File(rootProject.rootDir, '.git/hooks/' + HOOK_GIT_FILENAME)
+            if (preCommitFile == null || !preCommitFile.exists()) {
+                from new File(rootProject.rootDir, HOOK_GIT_FILENAME)
+                into {
+                    new File(rootProject.rootDir, '.git/hooks')
                 }
-                into new File(project.rootDir, ".git/hooks/")
+            }
+            doLast {
+                /**
+                 * 注意导入到 .git 目录后，需要对 ./git/hooks/post-commit 执行 chmod u+x，否则会：
+                 * hint: The '.git/hooks/post-commit' hook was ignored because it's not set as executable.
+                 */
+                println 'execute chmod u+x ' + HOOK_GIT_FILENAME
+                exec {
+                    workingDir '.'
+                    commandLine 'sh', '-c', 'chmod u+x ' + rootProject.rootDir + '/.git/hooks/' + HOOK_GIT_FILENAME
+                }
             }
         }
     }

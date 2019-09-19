@@ -1,6 +1,6 @@
 # GitLintPluginPackager
 
-每次 git commit 都会通过 git hooks 触发 Lint 检查。检查结果会以TXT格式输出到项目根目录下，如果有问题，则会触发 git reset 命令回滚提交。
+每次 git commit 都会通过 git hooks 触发 Lint 检查。检查结果会以 TXT 格式输出到项目根目录下，如果有问题，则会触发 git reset 命令回滚提交。
 
 ## git 增量检查的使用
 

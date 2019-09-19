@@ -1,1 +1,1 @@
-include ':app', ':GITLintPlugin', ':LintIssue'
+include ':sample', ':GITLintPlugin', ':LintIssue'

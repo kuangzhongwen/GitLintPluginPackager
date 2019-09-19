@@ -7,6 +7,9 @@ dependencies {
     implementation 'com.android.tools.lint:lint-checks:26.5.0'
     implementation 'com.android.tools.lint:lint:26.5.0'
 
+    // lint issue lib
+    implementation project(':LintIssue')
+
     implementation gradleApi()
     implementation localGroovy()
 }

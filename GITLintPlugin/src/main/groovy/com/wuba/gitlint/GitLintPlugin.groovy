@@ -1,6 +1,7 @@
 package com.wuba.gitlint
 
 import com.android.tools.lint.XmlReporter
+import com.wuba.lintissue.LintIssueRegistry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

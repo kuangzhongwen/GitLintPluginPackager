@@ -1,0 +1,3 @@
+#!/bin/sh
+/Users/kuangzhongwen/Desktop/project/HookGitWithLintDemo/./gradlew lintCheck
+exit 0

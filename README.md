@@ -17,4 +17,8 @@ GitLintPlugin 的配置，与 apply plugin 都可以发在顶级 build.gradle �
 每次 git commit 都会通过 git hooks 触发 Lint 检查。检查结果会以 TXT 格式输出到项目根目录下，如果有问题，则会触发 git reset 命令回滚提交。
 
 
-## 
+## lint 规则
+
+GITLintPlugin 依赖 LintIssue，执行 Lint 检测时，会调用 LintIssue 中的自定义规则。
+
+新增 Lint 规则请参考 /LintIssue/issue/LogIssue，需要在 LintIssueRegistry 中注册。

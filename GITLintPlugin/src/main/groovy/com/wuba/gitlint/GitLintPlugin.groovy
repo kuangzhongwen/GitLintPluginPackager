@@ -19,18 +19,18 @@ class GitLintPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        // 将 LintConfig 类作为 Project 的一个属性值，key 为 lintConfig
-        project.extensions.create("lintConfig", LintConfig.class)
+        // 将 GitLintConfig 类作为 Project 的一个属性值，key 为 gitLintConfig
+        project.extensions.create("gitLintConfig", GitLintConfig.class)
 
         /**
          * lintCheck task
          */
-        project.task("lintCheck") << {
+        project.task("gitlintCheck") << {
             println("Lint check BEGIN =====")
             String[] fileTypesWillFix
-            // 获取接入方配置的 lintConfig 属性
-            if (project.lintConfig != null) {
-                String fileTypes = project.lintConfig.lintCheckFileType
+            // 获取接入方配置的 gitLintConfig 属性
+            if (project.gitLintConfig != null) {
+                String fileTypes = project.gitLintConfig.lintCheckFileType
                 if (fileTypes != null) {
                     fileTypesWillFix = fileTypes.split(",")
                 }
@@ -69,7 +69,7 @@ class GitLintPlugin implements Plugin<Project> {
              * 输出路径: /{$rootDir}/lint-all-result.html
              */
             // 是否输出全部的扫描结果
-            if (project.lintConfig != null && project.lintConfig.lintReportAll) {
+            if (project.gitLintConfig != null && project.gitLintConfig.lintReportAll) {
                 File outputResult = new File("lint-check-result-all.xml")
                 def xmlReporter = new XmlReporter(cl, outputResult)
                 flag.reporters.add(xmlReporter)

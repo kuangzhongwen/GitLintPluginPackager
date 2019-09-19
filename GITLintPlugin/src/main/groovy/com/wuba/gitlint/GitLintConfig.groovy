@@ -5,7 +5,7 @@ package com.wuba.gitlint
  *
  * @author kuang on 2019/09/17
  */
-class LintConfig {
+class GitLintConfig {
 
     def lintCheckFileType = ""
     def lintReportAll = false

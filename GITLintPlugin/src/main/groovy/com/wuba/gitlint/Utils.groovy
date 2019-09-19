@@ -49,7 +49,7 @@ class Utils {
     }
 
     /**
-     * 通过 git diff 获取已提交文件的修改,包括文件的添加行的行号、删除行的行号、修改行的行号
+     * 通过 git diff 获取已提交文件的修改, 包括文件的添加行的行号、删除行的行号、修改行的行号
      *
      * @param filePath 文件路径
      * @param project Project对象
@@ -70,7 +70,6 @@ class Utils {
                     if (indexArray.length > 1) {
                         startArray = indexArray[1].split(",")
                     }
-
                     if (startArray != null && startArray.length > 1) {
                         start = Integer.parseInt(startArray[0])
                         end = Integer.parseInt(startArray[0]) + Integer.parseInt(startArray[1])

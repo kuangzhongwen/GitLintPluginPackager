@@ -25,7 +25,7 @@ class GitLintPlugin implements Plugin<Project> {
          * lintCheck task
          */
         project.task("lintCheck") << {
-            println("task lintCheck BEGIN =====")
+            println("Lint check BEGIN =====")
             String[] fileTypesWillFix
             // 获取接入方配置的 lintConfig 属性
             if (project.lintConfig != null) {
@@ -35,7 +35,7 @@ class GitLintPlugin implements Plugin<Project> {
                 }
             }
             // 如果未设置，则使用默认的 fileTypes
-            if (fileTypesWillFix == null || fileTypesWillFix.length <= 0) {
+            if (fileTypesWillFix == null || fileTypesWillFix.length == 0) {
                 fileTypesWillFix = fileTypes
             }
 
@@ -45,7 +45,6 @@ class GitLintPlugin implements Plugin<Project> {
             File file
             List<Integer> startIndex = new ArrayList<>()
             List<Integer> endIndex = new ArrayList<>()
-
             for (String path : commitChange) {
                 println("commit change file path: " + path)
                 if (Utils.isMatchFile(fileTypesWillFix, path)) {
@@ -55,18 +54,18 @@ class GitLintPlugin implements Plugin<Project> {
                 }
             }
 
-            println("wait checked files size:" + files.size())
+            println("lint check files size:" + files.size())
             // 获取 ANDROID_HOME 环境变量
             println(System.getenv("ANDROID_HOME"))
 
             def cl = new LintToolClient()
-            // LintCliFlags 用于设置Lint检查的一些标志
+            // LintCliFlags 用于设置 Lint 检查的一些标志
             def flag = cl.flags
             flag.setExitCode = true
-            /*
+            /**
              * HtmlReport
-             * 输出HTML格式的报告
-             * 输出路径:/{$rootDir}/lint-all-result.html
+             * 输出 HTML 格式的报告
+             * 输出路径: /{$rootDir}/lint-all-result.html
              */
             // 是否输出全部的扫描结果
             if (project.lintConfig != null && project.lintConfig.lintReportAll) {
@@ -74,31 +73,28 @@ class GitLintPlugin implements Plugin<Project> {
                 def xmlReporter = new XmlReporter(cl, outputResult)
                 flag.reporters.add(xmlReporter)
             }
-            /*
-             * 输出TXT格式的报告
-             */
+            // 输出TXT格式的报告
             File lintResult = new File("lint-check-result.txt")
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lintResult), "UTF-8"))
             def txtReporter = new LintTxtReporter(cl, lintResult, writer, startIndex, endIndex)
             flag.reporters.add(txtReporter)
 
-            /*
-             * 执行run方法开始lint检查
+            /**
+             * 执行 run 方法开始 lint 检查
              *
-             * LintIssueRegistry()-> 自定义Lint检查规则
-             * files->需要检查的文件文件
-             * result 检查结果 设置flag.setExitCode = true时, 有错误的时候返回1 反之返回0
+             * LintIssueRegistry()-> 自定义 Lint 检查规则
+             * files -> 需要检查的文件文件
+             * result 检查结果 设置 flag.setExitCode = true 时, 有错误的时候返回 1 反之返回 0
              */
             cl.run(new LintIssueRegistry(), files)
             println("lint issue numbers: " + txtReporter.issueNumber)
 
-            //根据报告中存在的问题进行判断是否需要回退
+            // 根据报告中存在的问题进行判断是否需要回退
             if (txtReporter.issueNumber > 0) {
-                //回退commit
+                // 回退 commit
                 "git reset HEAD~1".execute(null, project.getRootDir())
             }
-
-            println("============ Lint check end ===============")
+            println("============ Lint check END ===============")
         }
 
         /**

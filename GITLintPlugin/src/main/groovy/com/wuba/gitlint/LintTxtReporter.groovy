@@ -41,14 +41,11 @@ class LintTxtReporter extends Reporter {
     @Override
     void write(LintStats stats, List<Warning> issues) throws IOException {
         issueNumber = 0
-        StringBuilder output = new StringBuilder(issues.size() * 200)
-        output.append(outputBanner())
-        output.append("\n")
-        output.append("Lint检查日期: " + new Date().toString())
-        output.append("\n\n")
+        StringBuilder builder = new StringBuilder(issues.size() * 200)
+        builder.append(outputBanner()).append("\n").append("Lint检查日期: " + new Date().toString()).append("\n\n")
         if (issues.isEmpty()) {
             if (isDisplayEmpty()) {
-                output.append("没有扫描结果")
+                builder.append("没有扫描结果")
             }
         } else {
             Issue lastIssue = null
@@ -56,30 +53,30 @@ class LintTxtReporter extends Reporter {
             int lineNo
             for (Warning warning : issues) {
                 isBetweenNewLines = false
-                //输出的行号与文件中对应的行号相差1,所以这里进行加1操作
+                // 输出的行号与文件中对应的行号相差 1, 所以这里进行加 1 操作
                 lineNo = warning.line + 1
-                /*
-                 * 1.找出扫描结果的行号是否在修改代码之间
+                /**
+                 * 1. 找出扫描结果的行号是否在修改代码之间
                  */
-                for (int i = 0; i < startLines.size(); i++) {
+                int size = startLines.size()
+                for (int i = 0; i < size; i++) {
                     if (lineNo >= startLines.get(i) && lineNo < endLines.get(i)) {
-                        //println("w line " + lineNo + " " + startLines.get(i) + " " + endLines.get(i))
+                        // println("w line " + lineNo + " " + startLines.get(i) + " " + endLines.get(i))
                         isBetweenNewLines = true
                         break
                     }
                 }
-
-                /*
-                 * 2.如果Lint扫描到的Issue不在修改的范围之内,结束这次循环
+                /**
+                 * 2. 如果 Lint 扫描到的 Issue 不在修改的范围之内, 结束这次循环
                  */
                 if (!isBetweenNewLines) {
                     continue
                 }
-                /*
-                 * 3.Lint扫描的Issue在修改的范围内,将扫描结果写入文件
+                /**
+                 * 3. Lint 扫描的 Issue 在修改的范围内, 将扫描结果写入文件
                  */
                 if (warning.issue != lastIssue) {
-                    explainIssue(output, lastIssue)
+                    explainIssue(builder, lastIssue)
                     lastIssue = warning.issue
                 }
 
@@ -87,14 +84,12 @@ class LintTxtReporter extends Reporter {
                 issueNumber++
                 String p = warning.path
                 if (p != null) {
-                    output.append("(").append(issueNumber).append(")")
-                    output.append("文件名: ")
-                    appendPath(output, p)
-                    output.append('\n')
-                    output.append("问题行号: ")
+                    builder.append("(").append(issueNumber).append(")").append("文件名: ")
+                    appendPath(builder, p)
+                    builder.append('\n').append("问题行号: ")
                     if (warning.line >= 0) {
-                        output.append(Integer.toString(lineNo))
-                        output.append('\n')
+                        builder.append(Integer.toString(lineNo))
+                        builder.append('\n')
                     }
                 }
 
@@ -103,44 +98,36 @@ class LintTxtReporter extends Reporter {
                     severity = Severity.ERROR
                 }
 
-                output.append(severity.getDescription())
-                output.append(": ")
-                output.append(TextFormat.RAW.convertTo(warning.message, TextFormat.TEXT))
+                builder.append(severity.getDescription()).append(": ").append(TextFormat.RAW.convertTo(warning.message, TextFormat.TEXT))
 
                 if (warning.issue != null) {
-                    output.append(" [")
-                    output.append(warning.issue.getId())
-                    output.append(']')
+                    builder.append(" [").append(warning.issue.getId()).append(']')
                 }
-                output.append('\n')
+                builder.append('\n')
                 if (warning.errorLine != null && !warning.errorLine.isEmpty()) {
-                    output.append("问题代码: ")
-                    output.append(warning.errorLine)
+                    builder.append("问题代码: ").append(warning.errorLine)
                 }
-                //output.append('\n')
                 if (warning.location != null && warning.location.getSecondary() != null) {
                     Location location = warning.location.getSecondary()
                     boolean omitted = false
                     while (location != null) {
                         if (location.getMessage() != null && !location.getMessage().isEmpty()) {
-                            output.append("    ")
+                            builder.append("    ")
                             String path = client.getDisplayPath(warning.project, location.getFile())
-                            appendPath(output, path)
+                            appendPath(builder, path)
 
                             Position start = location.getStart()
                             if (start != null) {
                                 int line = start.getLine()
                                 if (line >= 0) {
-                                    output.append(':')
-                                    output.append(Integer.toString(line + 1))
+                                    builder.append(':').append(Integer.toString(line + 1))
                                 }
                             }
                             if (location.getMessage() != null && !location.getMessage().isEmpty()) {
-                                output.append(": ")
-                                output.append(TextFormat.RAW.convertTo(location.message, TextFormat.TEXT))
+                                builder.append(": ")
+                                builder.append(TextFormat.RAW.convertTo(location.message, TextFormat.TEXT))
                             }
-
-                            output.append('\n')
+                            builder.append('\n')
                         } else {
                             omitted = true
                         }
@@ -149,67 +136,62 @@ class LintTxtReporter extends Reporter {
 
                     if (omitted) {
                         location = warning.location.getSecondary()
-                        StringBuilder sb = new StringBuilder(100)
-                        sb.append("Also affects: ")
-                        int begin = sb.length()
+                        StringBuilder sbuilder = new StringBuilder(100)
+                        sbuilder.append("Also affects: ")
+                        int begin = sbuilder.length()
                         while (location != null) {
                             if (location.getMessage() == null || location.getMessage().isEmpty()) {
-                                if (sb.length() > begin) {
-                                    sb.append(", ")
+                                if (sbuilder.length() > begin) {
+                                    sbuilder.append(", ")
                                 }
                                 String path = client.getDisplayPath(warning.project, location.getFile())
-                                appendPath(sb, path)
-
+                                appendPath(sbuilder, path)
                                 Position start = location.getStart()
                                 if (start != null) {
                                     int line = start.getLine()
                                     if (line >= 0) {
-                                        sb.append(':')
-                                        sb.append(Integer.toString(line + 1))
+                                        sbuilder.append(':').append(Integer.toString(line + 1))
                                     }
                                 }
                             }
-
                             location = location.getSecondary()
                         }
-                        String wrapped = Main.wrap(sb.toString(), Main.MAX_LINE_WIDTH, "     ")
-                        output.append(wrapped)
+                        String wrapped = Main.wrap(sbuilder.toString(), Main.MAX_LINE_WIDTH, "     ")
+                        builder.append(wrapped)
                     }
                 }
 
                 if (warning.isVariantSpecific()) {
                     List<String> names
                     if (warning.includesMoreThanExcludes()) {
-                        output.append("Applies to variants: ")
+                        builder.append("Applies to variants: ")
                         names = warning.getIncludedVariantNames()
                     } else {
-                        output.append("Does not apply to variants: ")
+                        builder.append("Does not apply to variants: ")
                         names = warning.getExcludedVariantNames()
                     }
-                    output.append(Joiner.on(", ").join(names))
-                    output.append('\n')
+                    builder.append(Joiner.on(", ").join(names)).append('\n')
                 }
             }
 
             if (issueNumber == 0) {
-                output.append("没有扫描结果")
-                output.append('\n')
+                builder.append("没有扫描结果").append('\n')
             }
-            explainIssue(output, lastIssue)
-            output.append('\n\n')
-            output.append("====================================================================================")
+            explainIssue(builder, lastIssue)
+            builder.append('\n\n')
+            builder.append("====================================================================================")
                     .append("\n")
                     .append("+++++++++++++++++++ " + "共发现" + issueNumber + "个Issue,请根据Issue说明的提示信息修改." + "++++++++++++++++++++++++")
                     .append("\n")
                     .append("====================================================================================")
                     .append("\n")
-            writer.write(output.toString())
+            writer.write(builder.toString())
             writer.write('\n')
             writer.flush()
         }
     }
 
-    private void appendPath(@NonNull StringBuilder sb, @NonNull String path) {
+    private static void appendPath(@NonNull StringBuilder sb, @NonNull String path) {
         sb.append(path)
     }
 
@@ -219,19 +201,16 @@ class LintTxtReporter extends Reporter {
      * @param output 输出
      * @param issue Lint Issue
      */
-    private void explainIssue(@NonNull StringBuilder output, @Nullable Issue issue) {
+    private static void explainIssue(@NonNull StringBuilder output, @Nullable Issue issue) {
         if (issue == null || issue == IssueRegistry.LINT_ERROR || issue == IssueRegistry.BASELINE) {
             return
         }
-
         output.append("\n请根据以下提示修改.")
         output.append("\n===================================Issue说明========================================\n")
-
         String explanation = issue.getExplanation(TextFormat.TEXT)
         if (explanation.trim().isEmpty()) {
             return
         }
-
         String indent = "   "
         String formatted = SdkUtils.wrap(explanation, Main.MAX_LINE_WIDTH - indent.length(), null)
         output.append('\n')
@@ -259,7 +238,7 @@ class LintTxtReporter extends Reporter {
         }
     }
 
-    private String outputBanner() {
+    private static String outputBanner() {
         StringBuilder builder = new StringBuilder()
         builder.append("====================================================================================")
                 .append("\n")
